@@ -20,7 +20,7 @@
 ├─ apps/web/                 Next.js 前端和 API
 │  └─ src/lib/data/          数据层：全项目唯一取数入口，接 Supabase 只改这里
 ├─ docs/
-│  ├─ 00-项目分工与策划案.md
+│  ├─ 00-项目总纲.md         策划 + 分工 + 六天任务清单（正式版）
 │  ├─ 01-Git协作流程.md
 │  ├─ 02-Git新人指南.md
 │  ├─ 03-vibe编码对接指南.md
@@ -62,12 +62,11 @@ npm run lint
 
 ## 文档
 
-- [项目分工与策划案](<docs/00-项目分工与策划案.md>)
+- [项目总纲（正式版）](<docs/00-项目总纲.md>)
 - [Git 协作流程](<docs/01-Git协作流程.md>)
 - [Git 新人指南](<docs/02-Git新人指南.md>)
 - [接口契约](<docs/api/接口契约.md>)
 - [vibe coding 对接指南](<docs/03-vibe编码对接指南.md>)
-- [进度盘点与任务清单](<docs/04-进度盘点与任务清单.md>)
 - [分支流程（develop 集成）](<docs/05-分支流程-develop.md>)
 - [开发日志 D0](<docs/devlog/D0.md>)
 
