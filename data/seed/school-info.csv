@@ -1,0 +1,7 @@
+id,title,category,summary,source_url
+i1,图书馆开放时间,场馆,周一至周日 08:00-22:00 节假日另行通知,https://example.edu.cn/library
+i2,补办校园卡流程,生活,带上学生证到信息化服务大厅办理 工本费 20 元,https://example.edu.cn/card
+i3,奖学金申请材料,奖助,申请表 成绩单 证明材料 每年 9 月提交,https://example.edu.cn/scholarship
+i4,教学楼自习室查询,教务,空教室以教务系统当天公示为准,https://example.edu.cn/classroom
+i5,校医院就诊时间,生活,工作日 08:00-17:30 急诊 24 小时,https://example.edu.cn/hospital
+i6,就业宣讲会日历,就业,每周更新 请关注就业中心通知,https://example.edu.cn/jobs

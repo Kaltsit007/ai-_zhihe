@@ -1,0 +1,62 @@
+/**
+ * 前端组件专用 HTTP 客户端。
+ * 组件不许手写 fetch，统一走这里；接口路径和 docs/api/接口契约.md 一一对应。
+ */
+import type { CreateLostFoundInput } from "./data/lost-found";
+import type { CreateQuestionInput } from "./data/qa";
+import type { CreateTaskInput } from "./data/tasks";
+import type { LostFound, Question, Task, TaskStatus } from "./types";
+
+export interface ApiEnvelope<T> {
+  data: T | null;
+  error: { code: string; message: string } | null;
+}
+
+async function request<T>(
+  url: string,
+  method: "POST" | "PATCH",
+  body?: unknown
+): Promise<ApiEnvelope<T>> {
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+    return (await res.json()) as ApiEnvelope<T>;
+  } catch {
+    return {
+      data: null,
+      error: { code: "NETWORK", message: "网络请求失败，请稍后再试" },
+    };
+  }
+}
+
+export function apiCreateTask(input: CreateTaskInput) {
+  return request<Task>("/api/tasks", "POST", input);
+}
+
+export function apiUpdateTaskStatus(id: string, status: TaskStatus) {
+  return request<Task>("/api/tasks/" + id + "/status", "PATCH", { status });
+}
+
+export function apiCreateQuestion(input: CreateQuestionInput) {
+  return request<Question>("/api/questions", "POST", input);
+}
+
+export function apiCreateLostFound(input: CreateLostFoundInput) {
+  return request<LostFound>("/api/lost-found", "POST", input);
+}
+
+export interface InternalResult {
+  message: string;
+  text?: string;
+  sent?: boolean;
+  openCount?: number;
+  added?: number;
+  archived?: number;
+}
+
+export function apiRunInternal(name: "archive" | "crawl" | "digest") {
+  return request<InternalResult>("/api/internal/" + name, "POST", {});
+}

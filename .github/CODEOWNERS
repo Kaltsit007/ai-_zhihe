@@ -1,0 +1,10 @@
+# 把下面的用户名换成真实 GitHub 用户名
+# 注意：CODEOWNERS 只负责自动请求 review，不代替分支保护
+
+* @team-lead
+/apps/web/ @frontend-owner
+/supabase/ @db-owner
+/crawler/ @data-owner
+/bot/ @bot-owner
+/docs/ @content-owner
+/data/seed/ @data-owner

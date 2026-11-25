@@ -1,0 +1,7 @@
+id,title,category,location,deadline,status,description,contact
+t1,找同学一起参加校园创新赛,team,图书馆一楼讨论区,2026-11-26 18:00,pending,已有两人 还缺一个前端,student-a
+t2,周六早上拼车去高铁站,carpool,南门,2026-11-28 07:30,pending,三个人一起走 可以分摊,student-b
+t3,求帮忙搬两箱书到六楼,moving,竹园宿舍 3 号楼,2026-11-25 16:00,in_progress,有电梯 但需要两个人,student-c
+t4,青协周末社区服务招募,volunteer,大学生活动中心,2026-11-29 09:00,pending,需要 6 名志愿者 有志愿时长,student-d
+t5,摄影社冬季招新,club,二食堂门口,2026-11-30 18:00,pending,欢迎喜欢拍照的同学,student-e
+t6,帮忙找一下丢失的校园卡,lost,一食堂二楼,2026-11-24 12:00,completed,卡面有蓝色卡套 已找到,student-f

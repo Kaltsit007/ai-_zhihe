@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f4f6f2;
+  --foreground: #14231c;
+  --muted: #64746b;
+  --line: rgba(20, 35, 28, 0.08);
+  --brand: #0f5132;
+  --brand-soft: #e5f2ea;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(187, 247, 208, 0.35), transparent 28rem),
+    radial-gradient(circle at 92% 8%, rgba(254, 240, 138, 0.24), transparent 24rem),
+    var(--background);
+  color: var(--foreground);
+  font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", "Source Han Sans SC", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+::selection {
+  background: #bbf7d0;
+  color: #123524;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 18px 45px -32px rgba(20, 35, 28, 0.35);
+  backdrop-filter: blur(14px);
+}
+
+.map-surface {
+  background:
+    linear-gradient(rgba(15, 81, 50, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 81, 50, 0.055) 1px, transparent 1px),
+    linear-gradient(145deg, #edf3ea 0%, #e6efe4 52%, #dfeadf 100%);
+  background-size: 46px 46px, 46px 46px, 100% 100%;
+}
+
+.text-balance {
+  text-wrap: balance;
+}

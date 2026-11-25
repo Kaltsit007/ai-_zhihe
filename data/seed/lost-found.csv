@@ -1,0 +1,6 @@
+id,type,title,location,happened_at,status,description,contact
+l1,lost,黑色耳机盒,图书馆二楼,2026-11-24 18:20,open,耳机盒上有白色贴纸,student-a
+l2,found,校园卡,一食堂门口,2026-11-24 12:10,open,姓名已遮挡 请描述卡面,student-b
+l3,lost,蓝色雨伞,博学楼 A 座,2026-11-23 21:00,open,伞柄有灰色挂绳,student-c
+l4,found,钥匙串,体育馆东门,2026-11-23 17:30,claimed,已联系失主,student-d
+l5,lost,白色充电宝,竹园宿舍楼下,2026-11-22 20:15,closed,已找回,student-e
