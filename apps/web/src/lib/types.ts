@@ -53,6 +53,15 @@ export interface Question {
   time: string;
 }
 
+/** 回答：C 在 D2 实现 /api/questions/:id/answers 时启用 */
+export interface Answer {
+  id: string;
+  questionId: string;
+  content: string;
+  author: string;
+  createdAt: string;
+}
+
 export interface SchoolInfo {
   id: string;
   title: string;
