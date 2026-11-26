@@ -3,6 +3,10 @@ import { notFound } from "next/navigation";
 import { Icon } from "@/components/icon";
 import { TaskActions } from "@/components/task-actions";
 import { getTask } from "@/lib/data/tasks";
+import {
+  formatScheduleLabel,
+  isTaskScheduledPending,
+} from "@/lib/data/task-scheduler";
 import { categoryMeta, statusMeta } from "@/lib/meta";
 import type { TaskStatus } from "@/lib/types";
 import { cn, initials } from "@/lib/utils";
@@ -28,6 +32,7 @@ export default async function TaskDetailPage({
 
   const category = categoryMeta[task.category];
   const status = statusMeta[task.status];
+  const scheduledPending = isTaskScheduledPending(task);
   const currentIndex =
     task.status === "cancelled" ? 0 : steps.findIndex((step) => step.key === task.status);
 
@@ -68,6 +73,12 @@ export default async function TaskDetailPage({
             {task.urgent ? (
               <span className="rounded-full bg-rose-50 px-2.5 py-1 text-[10px] font-medium text-rose-600">
                 比较急
+              </span>
+            ) : null}
+            {scheduledPending ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-violet-50 px-2.5 py-1 text-[11px] font-medium text-violet-700 ring-1 ring-inset ring-violet-200">
+                <Icon name="clock" className="h-3 w-3" />
+                定时待发布 · 将于 {formatScheduleLabel(task.scheduledAt)} 自动上架
               </span>
             ) : null}
           </div>

@@ -1,4 +1,5 @@
 import { createTask, listTasks } from "@/lib/data/tasks";
+import { parseTaskDateTime } from "@/lib/data/task-scheduler";
 import { oneOf, str, strOr } from "@/lib/data/validation";
 import { fail, ok } from "@/lib/api/respond";
 import type { TaskCategory, TaskStatus } from "@/lib/types";
@@ -24,10 +25,15 @@ const STATUSES: readonly TaskStatus[] = [
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
+  const includeScheduledParam = searchParams.get("includeScheduled");
+  const includeScheduled =
+    includeScheduledParam === "1" || includeScheduledParam === "true";
+
   const tasks = await listTasks({
     keyword: searchParams.get("q") ?? undefined,
     category: oneOf(searchParams.get("category"), CATEGORIES) ?? undefined,
     status: oneOf(searchParams.get("status"), STATUSES) ?? undefined,
+    includeScheduled,
   });
   return ok(tasks);
 }
@@ -55,14 +61,36 @@ export async function POST(request: Request) {
   const contact = str(body.contact, 100);
   if (!contact) return fail("BAD_CONTACT", "联系方式不能为空");
 
+  const deadline = strOr(body.deadline, "长期有效", 40);
+
+  let scheduledAt: string | undefined;
+  if (body.scheduledAt !== undefined && body.scheduledAt !== null && body.scheduledAt !== "") {
+    const rawSchedule = str(body.scheduledAt, 40);
+    const parsedSchedule = parseTaskDateTime(rawSchedule);
+    if (!rawSchedule || !parsedSchedule) {
+      return fail("BAD_SCHEDULED_AT", "预约定时发布时间格式不合法");
+    }
+
+    const parsedDeadline = parseTaskDateTime(deadline);
+    if (parsedDeadline && parsedSchedule.getTime() > parsedDeadline.getTime()) {
+      return fail(
+        "SCHEDULED_AFTER_DEADLINE",
+        "预约上架时间不能晚于委托截止时间"
+      );
+    }
+
+    scheduledAt = rawSchedule;
+  }
+
   const task = await createTask({
     title,
     description,
     category,
     location,
-    deadline: strOr(body.deadline, "长期有效", 40),
+    deadline,
     contact,
     urgent: body.urgent === true,
+    scheduledAt,
   });
   return ok(task, 201);
 }

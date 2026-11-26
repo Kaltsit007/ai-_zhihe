@@ -4,11 +4,19 @@
  */
 import type { Task, TaskCategory, TaskStatus } from "@/lib/types";
 import { store } from "./store";
+import {
+  activateDueScheduledTasks,
+  isTaskScheduledPending,
+  parseTaskDateTime,
+  runTaskScheduleTick,
+  type TaskScheduleTickResult,
+} from "./task-scheduler";
 
 export interface TaskFilters {
   keyword?: string;
   category?: TaskCategory;
   status?: TaskStatus;
+  includeScheduled?: boolean;
 }
 
 export interface CreateTaskInput {
@@ -19,6 +27,7 @@ export interface CreateTaskInput {
   deadline: string;
   contact: string;
   urgent?: boolean;
+  scheduledAt?: string;
 }
 
 function formatDeadline(value: string): string {
@@ -28,7 +37,12 @@ function formatDeadline(value: string): string {
 }
 
 export async function listTasks(filters: TaskFilters = {}): Promise<Task[]> {
+  activateDueScheduledTasks(store.tasks);
+
   let result = [...store.tasks];
+  if (!filters.includeScheduled) {
+    result = result.filter((task) => !isTaskScheduledPending(task));
+  }
   if (filters.category) {
     result = result.filter((task) => task.category === filters.category);
   }
@@ -47,13 +61,26 @@ export async function listTasks(filters: TaskFilters = {}): Promise<Task[]> {
   return result;
 }
 
+/** 查询当前尚未到达预约时间的定时委托队列。 */
+export async function listScheduledPendingTasks(): Promise<Task[]> {
+  activateDueScheduledTasks(store.tasks);
+  return store.tasks.filter((task) => isTaskScheduledPending(task));
+}
+
 export async function getTask(id: string): Promise<Task | undefined> {
+  activateDueScheduledTasks(store.tasks);
   return store.tasks.find((task) => task.id === id);
 }
 
 export async function createTask(input: CreateTaskInput): Promise<Task> {
+  const now = new Date();
+  const parsedSchedule = parseTaskDateTime(input.scheduledAt, now);
+  const isFutureSchedule =
+    parsedSchedule !== null && parsedSchedule.getTime() > now.getTime();
+  const parsedDeadline = parseTaskDateTime(input.deadline, now);
+
   const task: Task = {
-    id: "t" + Date.now().toString(36),
+    id: "t" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
     title: input.title,
     description: input.description,
     category: input.category,
@@ -65,7 +92,11 @@ export async function createTask(input: CreateTaskInput): Promise<Task> {
     tags: [],
     urgent: input.urgent ?? false,
     pin: { x: 50, y: 50 },
-    createdAt: "刚刚",
+    createdAt: isFutureSchedule ? "定时待发布" : "刚刚",
+    ...(isFutureSchedule && parsedSchedule
+      ? { scheduledAt: parsedSchedule.toISOString() }
+      : {}),
+    ...(parsedDeadline ? { rawDeadline: parsedDeadline.toISOString() } : {}),
   };
   store.tasks = [task, ...store.tasks];
   return task;
@@ -80,14 +111,15 @@ export async function updateTaskStatus(
   return task;
 }
 
-/** 供 /api/internal/archive 调用：把已完成的委托归档。 */
+/** 供 /api/internal/archive 调用：执行到点预约激活 + 已完成/已过期委托自动归档。 */
+export async function runScheduledTaskMaintenance(
+  now: Date = new Date()
+): Promise<TaskScheduleTickResult> {
+  return runTaskScheduleTick(store.tasks, now);
+}
+
+/** 兼容原导出签名：返回本次归档总条数。 */
 export async function archiveCompletedTasks(): Promise<number> {
-  let count = 0;
-  for (const task of store.tasks) {
-    if (task.status === "completed") {
-      task.status = "archived";
-      count += 1;
-    }
-  }
-  return count;
+  const result = runTaskScheduleTick(store.tasks);
+  return result.archived;
 }

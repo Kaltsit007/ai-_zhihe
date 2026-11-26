@@ -1,4 +1,8 @@
-import { createLostFound, listLostFound } from "@/lib/data/lost-found";
+import {
+  createLostFound,
+  listLostFound,
+  validateLostFoundImages,
+} from "@/lib/data/lost-found";
 import { oneOf, str } from "@/lib/data/validation";
 import { fail, ok } from "@/lib/api/respond";
 import type { LostFoundStatus, LostFoundType } from "@/lib/types";
@@ -42,6 +46,11 @@ export async function POST(request: Request) {
 
   const time = str(body.time, 40) ?? "刚刚";
 
+  const imageCheck = validateLostFoundImages(body.images);
+  if (imageCheck.errorCode && imageCheck.errorMessage) {
+    return fail(imageCheck.errorCode, imageCheck.errorMessage);
+  }
+
   const item = await createLostFound({
     type,
     title,
@@ -49,6 +58,7 @@ export async function POST(request: Request) {
     time,
     description,
     contact,
+    images: imageCheck.images,
   });
   return ok(item, 201);
 }
