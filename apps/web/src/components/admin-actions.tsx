@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Icon, type IconName } from "./icon";
-import { apiRunInternal } from "@/lib/api-client";
+import { apiRunInternal, type InternalResult } from "@/lib/api-client";
 
 type ActionKey = "archive" | "crawl" | "digest";
 
@@ -17,10 +17,11 @@ const actions: Array<{
 }> = [
   {
     key: "archive",
-    title: "自动归档",
-    description: "扫描已完成委托，写入 archived 状态，默认列表和地图隐藏。",
+    title: "定时委托调度 & 自动归档",
+    description:
+      "扫描已到预约时间的定时委托自动上架，并将已完成及截止时间已过期未接单的委托流转为 archived（不删除数据）。",
     icon: "archive",
-    label: "立即归档",
+    label: "立即执行调度",
     tone: "bg-amber-50 text-amber-700",
   },
   {
@@ -45,11 +46,16 @@ export function AdminActions() {
   const router = useRouter();
   const [pendingKey, setPendingKey] = useState<ActionKey | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [lastResult, setLastResult] = useState<{
+    key: ActionKey;
+    data: InternalResult;
+  } | null>(null);
   const [digestText, setDigestText] = useState<string | null>(null);
 
   async function run(key: ActionKey) {
     setPendingKey(key);
     setMessage(null);
+    setLastResult(null);
     setDigestText(null);
 
     const result = await apiRunInternal(key);
@@ -60,6 +66,9 @@ export function AdminActions() {
       return;
     }
     setMessage(result.data ? result.data.message : "已完成");
+    if (result.data) {
+      setLastResult({ key, data: result.data });
+    }
     if (key === "digest") {
       setDigestText(result.data?.text ?? null);
     }
@@ -70,24 +79,42 @@ export function AdminActions() {
     <div className="space-y-4">
       {message ? (
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-800">
-          {message}
+          <p className="font-medium">{message}</p>
+          {lastResult?.key === "archive" ? (
+            <div className="mt-2 flex flex-wrap gap-2 text-[11px] text-emerald-700">
+              <span className="rounded-full bg-white/80 px-2.5 py-0.5 ring-1 ring-emerald-200">
+                到点上架：{lastResult.data.activated ?? 0} 条
+              </span>
+              <span className="rounded-full bg-white/80 px-2.5 py-0.5 ring-1 ring-emerald-200">
+                总计归档：{lastResult.data.archived ?? 0} 条
+              </span>
+              <span className="rounded-full bg-white/80 px-2.5 py-0.5 ring-1 ring-emerald-200">
+                已完成归档：{lastResult.data.archivedCompleted ?? 0} 条
+              </span>
+              <span className="rounded-full bg-white/80 px-2.5 py-0.5 ring-1 ring-emerald-200">
+                过期未接单归档：{lastResult.data.archivedExpired ?? 0} 条
+              </span>
+            </div>
+          ) : null}
         </div>
       ) : null}
 
       {digestText ? (
-        <pre className="card overflow-x-auto whitespace-pre-wrap p-4 text-[11px] leading-5 text-slate-600">
+        <pre className="card overflow-x-auto whitespace-pre-wrap p-4 text-xs leading-5 text-slate-600">
 {digestText}
         </pre>
       ) : null}
 
       <div className="grid gap-4 md:grid-cols-3">
         {actions.map((action) => (
-          <article key={action.key} className="card p-5">
+          <article key={action.key} className="card flex flex-col p-5">
             <span className={"flex h-10 w-10 items-center justify-center rounded-2xl " + action.tone}>
               <Icon name={action.icon} className="h-5 w-5" />
             </span>
             <h3 className="mt-4 text-sm font-semibold">{action.title}</h3>
-            <p className="mt-1.5 text-xs leading-5 text-slate-500">{action.description}</p>
+            <p className="mt-1.5 flex-1 text-xs leading-5 text-slate-500">
+              {action.description}
+            </p>
             <button
               type="button"
               disabled={pendingKey !== null}

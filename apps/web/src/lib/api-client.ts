@@ -137,6 +137,9 @@ export interface InternalResult {
   openCount?: number;
   added?: number;
   archived?: number;
+  activated?: number;
+  archivedCompleted?: number;
+  archivedExpired?: number;
 }
 
 export function apiRunInternal(name: "archive" | "crawl" | "digest") {

@@ -39,6 +39,8 @@ export interface Task {
   urgent?: boolean;
   pin: { x: number; y: number };
   createdAt: string;
+  scheduledAt?: string;
+  rawDeadline?: string;
 }
 
 export interface Question {

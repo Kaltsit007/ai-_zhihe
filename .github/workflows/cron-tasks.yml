@@ -1,0 +1,40 @@
+name: Scheduled Tasks & Auto Archive
+
+on:
+  schedule:
+    # 每 30 分钟触发一次：激活到点定时委托 + 归档已完成/已过期委托
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+jobs:
+  run-task-scheduler:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger scheduled tasks & archive endpoint
+        env:
+          APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$APP_BASE_URL" ]; then
+            echo "APP_BASE_URL secret is not configured yet. Skipping remote cron trigger gracefully."
+            exit 0
+          fi
+
+          BASE_URL="${APP_BASE_URL%/}"
+          ENDPOINT="${BASE_URL}/api/internal/archive"
+          echo "Calling ${ENDPOINT} ..."
+
+          HTTP_CODE=$(curl -sS -o /tmp/cron_response.json -w "%{http_code}" \
+            -X POST "${ENDPOINT}" \
+            -H "Content-Type: application/json" \
+            -H "x-cron-secret: ${CRON_SECRET}" \
+            -d "{}")
+
+          echo "HTTP status: ${HTTP_CODE}"
+          cat /tmp/cron_response.json
+          echo ""
+
+          if [ "$HTTP_CODE" -lt 200 ] || [ "$HTTP_CODE" -ge 300 ]; then
+            echo "Cron endpoint returned non-2xx status: ${HTTP_CODE}"
+            exit 1
+          fi
