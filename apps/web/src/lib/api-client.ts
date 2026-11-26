@@ -8,6 +8,7 @@ import type { CreateTaskInput } from "./data/tasks";
 import type {
   Answer,
   LostFound,
+  LostFoundStatus,
   Question,
   QuestionStatus,
   Task,
@@ -89,6 +90,14 @@ export function apiCreateAnswer(questionId: string, input: CreateAnswerInput) {
 
 export function apiCreateLostFound(input: CreateLostFoundInput) {
   return request<LostFound>("/api/lost-found", "POST", input);
+}
+
+export function apiUpdateLostFoundStatus(id: string, status: LostFoundStatus) {
+  return request<LostFound>(
+    "/api/lost-found/" + encodeURIComponent(id),
+    "PATCH",
+    { status }
+  );
 }
 
 export interface InternalResult {
