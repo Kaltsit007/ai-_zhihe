@@ -1,4 +1,5 @@
 import Link from "next/link";
+
 import { CampusMap } from "@/components/campus-map";
 import { Icon } from "@/components/icon";
 import { PageHeader } from "@/components/page-header";
@@ -8,16 +9,21 @@ import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
-const nextSteps = [
-  "接 Leaflet，替换演示底图",
-  "统一 GCJ-02 / WGS84 坐标",
-  "点位按分类和状态筛选",
-  "点击点位打开任务详情",
+/** 只有还能接单 / 正在进行的委托才值得出现在地图上。 */
+function isMapVisible(status: string): boolean {
+  return status === "pending" || status === "in_progress";
+}
+
+const mapFacts = [
+  { label: "底图", value: "高德栅格瓦片" },
+  { label: "坐标系", value: "GCJ-02（与底图同口径）" },
+  { label: "点位口径", value: "待接单 + 进行中" },
+  { label: "点击行为", value: "打开委托详情" },
 ];
 
 export default async function MapPage() {
   const tasks = await listTasks();
-  const active = tasks.filter((task) => task.status !== "archived");
+  const active = tasks.filter((task) => isMapVisible(task.status));
   const counts = Object.entries(categoryMeta).map(([key, meta]) => ({
     key,
     ...meta,
@@ -29,7 +35,7 @@ export default async function MapPage() {
       <PageHeader
         eyebrow="Campus map"
         title="地图可视化"
-        description="先看清楚“哪里有人需要帮忙”。当前是演示地图，下一步接 Leaflet 和真实坐标。"
+        description="真实校区底图，点位对应还能接的委托。已完成、已取消和归档的不上图。"
         actions={
           <Link
             href="/tasks/new"
@@ -46,22 +52,25 @@ export default async function MapPage() {
           <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-700">
-                Live demo
+                Live map
               </p>
               <h2 className="mt-1 text-lg font-semibold">校园互助点位</h2>
+              <p className="mt-1 text-[11px] text-slate-500">
+                共 {tasks.length} 条委托，{active.length} 条可显示在地图上。
+              </p>
             </div>
             <div className="flex items-center gap-2 text-[10px] text-slate-400">
               <span className="flex items-center gap-1">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                {active.length} 个活跃点
+                {active.length} 个可接点位
               </span>
               <span className="flex items-center gap-1">
                 <span className="h-1.5 w-1.5 rounded-full bg-slate-300" />
-                已归档默认隐藏
+                已完成 / 已取消不上图
               </span>
             </div>
           </div>
-          <CampusMap tasks={active} heightClass="h-[560px]" limit={8} />
+          <CampusMap tasks={active} heightClass="h-[560px]" />
         </section>
 
         <aside className="space-y-4">
@@ -83,15 +92,15 @@ export default async function MapPage() {
           <section className="card p-5">
             <div className="flex items-center gap-2 text-sm font-semibold">
               <Icon name="map" className="h-4 w-4 text-emerald-700" />
-              地图接入计划
+              地图信息
             </div>
             <ul className="mt-3 space-y-2.5">
-              {nextSteps.map((step, index) => (
-                <li key={step} className="flex gap-2 text-[11px] leading-5 text-slate-500">
-                  <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-slate-100 text-[10px] font-semibold text-slate-500">
-                    {index + 1}
+              {mapFacts.map((fact) => (
+                <li key={fact.label} className="flex items-baseline justify-between gap-3">
+                  <span className="shrink-0 text-[11px] text-slate-400">{fact.label}</span>
+                  <span className="text-right text-[11px] font-medium text-slate-600">
+                    {fact.value}
                   </span>
-                  {step}
                 </li>
               ))}
             </ul>
@@ -100,10 +109,11 @@ export default async function MapPage() {
           <section className="card bg-gradient-to-br from-emerald-50 to-white p-5">
             <div className="flex items-center gap-2 text-sm font-semibold">
               <Icon name="shield" className="h-4 w-4 text-emerald-700" />
-              坐标提醒
+              坐标口径
             </div>
             <p className="mt-2 text-[11px] leading-5 text-slate-500">
-              高德瓦片用 GCJ-02，OSM 用 WGS84。seed 数据和用户选点必须统一一种，否则点位会整体偏移。
+              高德瓦片用 GCJ-02，OSM 用 WGS84。现在点位和底图都走 GCJ-02，不会整体偏移。
+              D3 做发布页选点时沿用同一口径，不要混用。
             </p>
           </section>
         </aside>
