@@ -1,0 +1,149 @@
+/* Leaflet 的样式微调，只作用于地图容器内部，别影响页面其它部分。 */
+
+.leaflet-map {
+  isolation: isolate;
+  z-index: 0;
+  background: #e7efe4;
+  font-family: inherit;
+}
+
+.leaflet-map .leaflet-container {
+  background: #e7efe4;
+  font-family: inherit;
+  outline: none;
+}
+
+/* 点和线别太锐利，跟页面的圆角风格统一 */
+.leaflet-map .leaflet-control-zoom,
+.leaflet-map .leaflet-control-scale-line,
+.leaflet-map .leaflet-control-attribution {
+  border-radius: 10px;
+  border-color: rgba(20, 35, 28, 0.12);
+  background: rgba(255, 255, 255, 0.86);
+  color: #475569;
+  backdrop-filter: blur(6px);
+}
+
+.leaflet-map .leaflet-control-zoom a {
+  color: #0f5132;
+  font-weight: 600;
+  border-color: rgba(20, 35, 28, 0.1);
+}
+
+.leaflet-map .leaflet-control-zoom a:hover {
+  background: #e8f3ec;
+}
+
+.leaflet-map .leaflet-control-attribution {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 8px 0 0 0;
+}
+
+.leaflet-map .leaflet-control-scale-line {
+  font-size: 10px;
+  border-width: 0 0 2px 2px;
+  padding: 1px 6px;
+}
+
+/* 自绘 pin：不用 Leaflet 默认图标，避免打包后图片 404 */
+.task-pin {
+  background: transparent;
+  border: 0;
+}
+
+.task-pin__halo {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  opacity: 0.16;
+  animation: task-pin-pulse 2.6s ease-out infinite;
+}
+
+.task-pin__body {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  width: 34px;
+  height: 34px;
+  transform: translate(-50%, -50%);
+  align-items: center;
+  justify-content: center;
+  border: 2.5px solid #fff;
+  border-radius: 999px;
+  box-shadow: 0 10px 20px -8px rgba(15, 23, 42, 0.55);
+  transition: transform 0.16s ease-out;
+}
+
+.task-pin:hover .task-pin__body {
+  transform: translate(-50%, -50%) scale(1.12);
+}
+
+.task-pin:focus-visible .task-pin__body {
+  outline: 2px solid #0f5132;
+  outline-offset: 3px;
+}
+
+@keyframes task-pin-pulse {
+  0% {
+    transform: scale(0.55);
+    opacity: 0.28;
+  }
+  70% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* 悬浮提示 */
+.task-tip {
+  display: block;
+  padding: 1px;
+  line-height: 1.45;
+}
+
+.task-tip__title {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.task-tip__meta {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: #cbd5e1;
+}
+
+.leaflet-map .leaflet-tooltip.task-tip-bubble {
+  min-width: 200px;
+  max-width: 240px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.94);
+  color: #fff;
+  box-shadow: 0 12px 26px -14px rgba(15, 23, 42, 0.8);
+  white-space: normal;
+  text-align: left;
+}
+
+.leaflet-map .leaflet-tooltip-top.task-tip-bubble::before {
+  border-top-color: rgba(15, 23, 42, 0.94);
+}
+
+.leaflet-map .leaflet-tooltip-bottom.task-tip-bubble::before {
+  border-bottom-color: rgba(15, 23, 42, 0.94);
+}
+
+.leaflet-map .leaflet-tooltip-left.task-tip-bubble::before {
+  border-left-color: rgba(15, 23, 42, 0.94);
+}
+
+.leaflet-map .leaflet-tooltip-right.task-tip-bubble::before {
+  border-right-color: rgba(15, 23, 42, 0.94);
+}

@@ -1,5 +1,7 @@
 # 校园互助平台 Git 项目管理流程
 
+> **2026-11-25 更新：已启用 develop 集成分支。** 日常开发从 develop 开分支、PR 合回 develop；main 只接收 develop 的发布 PR（里程碑由 A 操作）。具体命令见 [05-分支流程](<05-分支流程-develop.md>)。下文凡写“从 main 开分支 / 合到 main”的地方，一律按 05 执行。
+
 > 适用：5 人、6 天、Next.js + Supabase + Vercel、1 位内容同学不写代码。  
 > 目标：每天能合并、main 随时可部署、D5 能冻结、D6 能提交。
 
@@ -154,7 +156,7 @@ GitHub Free 的私有仓库可能无法使用完整分支保护。你们是学�
 - 一个分支只做一个任务，不混重构、格式化、新功能。
 - 分支超过 24 小时没合，就拆小或找 A。
 - 合并后删除分支。
-- 不建 develop，不建长期 release 分支；发布用 tag。
+- 长期分支只有 main 和 develop；不建长期 release 分支，发布用 tag。
 - D5 之后只允许 fix/ 和 hotfix/，A 合并。
 
 ## 4. Issue 和看板

@@ -10,12 +10,25 @@
  * 注意：Next dev 下页面（RSC）和 API 路由可能是两份模块实例，
  * 内存状态必须挂在 globalThis 上，否则“API 写入 → 页面看到”会失效。
  */
-import { lostFound, questions, schoolInfo, tasks } from "@/lib/mock-data";
-import type { LostFound, Question, SchoolInfo, Task } from "@/lib/types";
+import {
+  answers,
+  lostFound,
+  questions,
+  tasks,
+} from "@/lib/mock-data";
+import schoolInfoSeed from "./school-info.seed.json";
+import type {
+  Answer,
+  LostFound,
+  Question,
+  SchoolInfo,
+  Task,
+} from "@/lib/types";
 
 interface DemoStore {
   tasks: Task[];
   questions: Question[];
+  answers: Answer[];
   schoolInfo: SchoolInfo[];
   lostFound: LostFound[];
 }
@@ -24,12 +37,20 @@ function createStore(): DemoStore {
   return {
     tasks: [...tasks],
     questions: [...questions],
-    schoolInfo: [...schoolInfo],
+    answers: [...answers],
+    // 学校信息库：310 条来自 crawler 抓取的公开数据（B 的 D2 交付），
+    // 其余模块仍是 mock seed。
+    schoolInfo: [...(schoolInfoSeed as unknown as SchoolInfo[])],
     lostFound: [...lostFound],
   };
 }
 
 const globalForStore = globalThis as unknown as { __aiZhiheStore?: DemoStore };
 
-export const store: DemoStore = globalForStore.__aiZhiheStore ?? createStore();
+const existing = globalForStore.__aiZhiheStore;
+if (existing && !Array.isArray(existing.answers)) {
+  existing.answers = [...answers];
+}
+
+export const store: DemoStore = existing ?? createStore();
 globalForStore.__aiZhiheStore = store;

@@ -6,6 +6,7 @@ import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Icon } from "./icon";
 import { apiCreateTask } from "@/lib/api-client";
+import { formatScheduleLabel } from "@/lib/data/task-scheduler";
 import { categoryMeta } from "@/lib/meta";
 import type { Task, TaskCategory } from "@/lib/types";
 
@@ -18,16 +19,29 @@ export function TaskForm() {
   const [deadline, setDeadline] = useState("");
   const [contact, setContact] = useState("");
   const [urgent, setUrgent] = useState(false);
+  const [enableSchedule, setEnableSchedule] = useState(false);
+  const [scheduledAt, setScheduledAt] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [created, setCreated] = useState<Task | null>(null);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setPending(true);
     setError(null);
     setCreated(null);
 
+    if (enableSchedule) {
+      if (!scheduledAt) {
+        setError("已开启定时发布，请选择预计自动上架时间");
+        return;
+      }
+      if (deadline && new Date(scheduledAt).getTime() > new Date(deadline).getTime()) {
+        setError("预约上架时间不能晚于委托截止时间");
+        return;
+      }
+    }
+
+    setPending(true);
     const result = await apiCreateTask({
       title,
       description,
@@ -36,14 +50,24 @@ export function TaskForm() {
       deadline: deadline || "长期有效",
       contact,
       urgent,
+      scheduledAt: enableSchedule ? scheduledAt : undefined,
     });
 
     setPending(false);
-    if (result.error) {
-      setError(result.error.message);
+    if (result.error || !result.data) {
+      setError(result.error?.message ?? "发布失败，请稍后重试");
       return;
     }
+
     setCreated(result.data);
+    setTitle("");
+    setDescription("");
+    setLocation("");
+    setDeadline("");
+    setContact("");
+    setUrgent(false);
+    setEnableSchedule(false);
+    setScheduledAt("");
     router.refresh();
   }
 
@@ -57,8 +81,8 @@ export function TaskForm() {
             </p>
             <h2 className="mt-1 text-lg font-semibold">发布一条委托</h2>
           </div>
-          <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-medium text-amber-700">
-            写入内存演示库
+          <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700">
+            支持预约定时上架
           </span>
         </div>
 
@@ -66,10 +90,12 @@ export function TaskForm() {
           <div className="mt-5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
             <div className="flex items-center gap-2 font-medium">
               <Icon name="check" className="h-4 w-4" />
-              发布成功
+              {created.scheduledAt ? "定时委托已预约成功" : "发布成功"}
             </div>
             <p className="mt-1.5 text-xs leading-5 text-emerald-700">
-              委托已进入列表和地图（演示环境存内存，重启后恢复 seed）。
+              {created.scheduledAt
+                ? `已进入待生效定时队列，将于 ${formatScheduleLabel(created.scheduledAt)} 自动上架到委托广场与校园地图。`
+                : "委托已上架至委托广场与校园地图，同学现在即可查看并接单。"}
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               <Link
@@ -169,6 +195,51 @@ export function TaskForm() {
             />
           </label>
 
+          <div className="space-y-3 rounded-2xl border border-slate-200/80 bg-slate-50/70 p-4 sm:col-span-2">
+            <label className="flex cursor-pointer items-center gap-2.5">
+              <input
+                type="checkbox"
+                checked={enableSchedule}
+                onChange={(event) => {
+                  const checked = event.target.checked;
+                  setEnableSchedule(checked);
+                  if (!checked) setScheduledAt("");
+                }}
+                className="h-4 w-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-100"
+              />
+              <span className="text-xs font-semibold text-slate-800">
+                开启定时发布（可选）
+              </span>
+              <span className="rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-medium text-violet-700">
+                到点自动上架
+              </span>
+            </label>
+
+            {enableSchedule ? (
+              <div className="space-y-2 pt-1">
+                <label className="block">
+                  <span className="text-xs font-medium text-slate-700">
+                    预约上架时间
+                  </span>
+                  <input
+                    type="datetime-local"
+                    required={enableSchedule}
+                    value={scheduledAt}
+                    onChange={(event) => setScheduledAt(event.target.value)}
+                    className="mt-1.5 h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 sm:max-w-xs"
+                  />
+                </label>
+                <p className="text-xs leading-5 text-slate-500">
+                  委托将在指定时间自动上架到委托广场与地图，未到点前不会在公开列表中暴露。
+                </p>
+              </div>
+            ) : (
+              <p className="text-xs text-slate-500">
+                适合提前预约明早拼车、宿舍搬运或次日组队，到点自动对外公开。
+              </p>
+            )}
+          </div>
+
           <label className="flex items-center gap-2 sm:col-span-2">
             <input
               type="checkbox"
@@ -193,7 +264,11 @@ export function TaskForm() {
             className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-[#0f5132] px-5 text-sm font-medium text-white shadow-sm transition hover:bg-[#0b3f27] disabled:cursor-not-allowed disabled:opacity-60"
           >
             <Icon name="plus" className="h-4 w-4" />
-            {pending ? "发布中…" : "发布委托"}
+            {pending
+              ? "提交中…"
+              : enableSchedule
+              ? "预约定时发布"
+              : "发布委托"}
           </button>
         </div>
       </div>
@@ -202,13 +277,15 @@ export function TaskForm() {
         <div className="card p-5">
           <div className="flex items-center gap-2 text-sm font-semibold">
             <Icon name="map" className="h-4 w-4 text-emerald-700" />
-            地图选点
+            地图定位说明
           </div>
           <div className="map-surface mt-3 flex h-48 items-center justify-center rounded-2xl border border-emerald-950/10">
-            <div className="rounded-2xl bg-white/80 px-4 py-3 text-center shadow-sm backdrop-blur">
+            <div className="rounded-2xl bg-white/85 px-4 py-3 text-center shadow-sm backdrop-blur">
               <Icon name="pin" className="mx-auto h-6 w-6 text-emerald-700" />
-              <p className="mt-1 text-xs font-medium text-slate-700">先放在地图中心</p>
-              <p className="mt-0.5 text-[10px] text-slate-400">接 Leaflet 后换成真实选点</p>
+              <p className="mt-1 text-xs font-medium text-slate-700">按校内地标自动落点</p>
+              <p className="mt-0.5 text-[11px] text-slate-500">
+                填写图书馆、博学楼、南门、竹园等会自动匹配矿大地图点位
+              </p>
             </div>
           </div>
         </div>
@@ -221,8 +298,8 @@ export function TaskForm() {
           <ul className="mt-3 space-y-2 text-xs leading-5 text-slate-500">
             <li>联系方式只给接单同学看，不公开在列表。</li>
             <li>不要填写身份证号、住址等敏感信息。</li>
-            <li>图片先压缩，单张建议小于 1 MB。</li>
-            <li>过期或完成的委托会进入归档，不会一直挂着。</li>
+            <li>开启定时发布后，未到预约时间不会出现在广场和地图中。</li>
+            <li>已完成或超过截止时间未接单的委托会自动进入归档，不会一直挂着。</li>
           </ul>
         </div>
       </aside>
