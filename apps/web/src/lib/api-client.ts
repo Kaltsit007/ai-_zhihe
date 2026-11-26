@@ -20,6 +20,35 @@ export interface ApiEnvelope<T> {
   error: { code: string; message: string } | null;
 }
 
+export interface UploadLostFoundImagesResult {
+  urls: string[];
+  storage: "supabase" | "demo";
+}
+
+async function parseEnvelope<T>(res: Response): Promise<ApiEnvelope<T>> {
+  const text = await res.text();
+  if (!text) {
+    return {
+      data: null,
+      error: {
+        code: `HTTP_${res.status}`,
+        message: `服务返回空响应（${res.status}）`,
+      },
+    };
+  }
+  const parsed = JSON.parse(text) as ApiEnvelope<T>;
+  if (!res.ok && !parsed.error) {
+    return {
+      data: null,
+      error: {
+        code: `HTTP_${res.status}`,
+        message: `请求失败（${res.status}）`,
+      },
+    };
+  }
+  return parsed;
+}
+
 async function request<T>(
   url: string,
   method: "GET" | "POST" | "PATCH",
@@ -31,27 +60,7 @@ async function request<T>(
       headers: body === undefined ? undefined : { "Content-Type": "application/json" },
       body: body === undefined ? undefined : JSON.stringify(body),
     });
-    const text = await res.text();
-    if (!text) {
-      return {
-        data: null,
-        error: {
-          code: `HTTP_${res.status}`,
-          message: `服务返回空响应（${res.status}）`,
-        },
-      };
-    }
-    const parsed = JSON.parse(text) as ApiEnvelope<T>;
-    if (!res.ok && !parsed.error) {
-      return {
-        data: null,
-        error: {
-          code: `HTTP_${res.status}`,
-          message: `请求失败（${res.status}）`,
-        },
-      };
-    }
-    return parsed;
+    return await parseEnvelope<T>(res);
   } catch {
     return {
       data: null,
@@ -98,6 +107,27 @@ export function apiUpdateLostFoundStatus(id: string, status: LostFoundStatus) {
     "PATCH",
     { status }
   );
+}
+
+export async function apiUploadLostFoundImages(
+  files: File[]
+): Promise<ApiEnvelope<UploadLostFoundImagesResult>> {
+  try {
+    const formData = new FormData();
+    for (const file of files) {
+      formData.append("files", file);
+    }
+    const res = await fetch("/api/uploads/lost-found", {
+      method: "POST",
+      body: formData,
+    });
+    return await parseEnvelope<UploadLostFoundImagesResult>(res);
+  } catch {
+    return {
+      data: null,
+      error: { code: "NETWORK", message: "图片上传失败，请检查网络后重试" },
+    };
+  }
 }
 
 export interface InternalResult {

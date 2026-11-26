@@ -115,25 +115,49 @@ export function LostFoundBoard({ items }: { items: LostFound[] }) {
         {filtered.map((item) => {
           const type = lostTypeMeta[item.type];
           const status = lostStatusMeta[item.status];
+          const images = item.images ?? [];
+          const coverImage = images[0];
+
           return (
             <article
               key={item.id}
               className="card flex flex-col overflow-hidden transition hover:border-emerald-900/20 hover:shadow-md"
             >
-              <Link
-                href={`/lost-found/${item.id}`}
-                className={cn("block h-28 bg-gradient-to-br", item.color)}
-              >
-                <div className="flex h-full items-end justify-between p-4 text-white">
-                  <span className="rounded-full bg-white/20 px-2.5 py-1 text-xs font-medium backdrop-blur">
+              {coverImage ? (
+                <Link
+                  href={`/lost-found/${item.id}`}
+                  className="relative block h-40 overflow-hidden bg-slate-100"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={coverImage}
+                    alt={item.title}
+                    className="h-full w-full object-cover transition duration-300 hover:scale-105"
+                  />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/65 via-transparent to-slate-950/20" />
+                  <span className="absolute bottom-3 left-3 rounded-full bg-white/20 px-2.5 py-1 text-xs font-medium text-white backdrop-blur">
                     {type.label}
                   </span>
-                  <Icon
-                    name={item.type === "lost" ? "search" : "check"}
-                    className="h-8 w-8 opacity-60"
-                  />
-                </div>
-              </Link>
+                  <span className="absolute right-3 top-3 rounded-full bg-slate-950/65 px-2.5 py-1 text-xs font-medium text-white backdrop-blur">
+                    共 {images.length} 张
+                  </span>
+                </Link>
+              ) : (
+                <Link
+                  href={`/lost-found/${item.id}`}
+                  className={cn("block h-28 bg-gradient-to-br", item.color)}
+                >
+                  <div className="flex h-full items-end justify-between p-4 text-white">
+                    <span className="rounded-full bg-white/20 px-2.5 py-1 text-xs font-medium backdrop-blur">
+                      {type.label}
+                    </span>
+                    <Icon
+                      name={item.type === "lost" ? "search" : "check"}
+                      className="h-8 w-8 opacity-60"
+                    />
+                  </div>
+                </Link>
+              )}
 
               <div className="flex flex-1 flex-col p-5">
                 <div className="flex items-start justify-between gap-2">

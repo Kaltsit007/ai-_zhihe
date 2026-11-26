@@ -81,4 +81,5 @@ export interface LostFound {
   description: string;
   contact: string;
   color: string;
+  images?: string[];
 }

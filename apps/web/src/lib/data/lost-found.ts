@@ -15,6 +15,12 @@
 import type { LostFound, LostFoundStatus, LostFoundType } from "@/lib/types";
 import { store } from "./store";
 
+export const MAX_LOST_FOUND_IMAGES = 3;
+
+const SAFE_DATA_IMAGE_RE =
+  /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/;
+const MAX_DATA_URL_LENGTH = 1_600_000; // ~1.15MB base64 payload guard
+
 export interface LostFoundFilters {
   type?: LostFoundType;
   status?: LostFoundStatus;
@@ -27,6 +33,7 @@ export interface CreateLostFoundInput {
   time: string;
   description: string;
   contact: string;
+  images?: string[];
 }
 
 export interface LostFoundStats {
@@ -35,6 +42,62 @@ export interface LostFoundStats {
   claimedCount: number;
   closedCount: number;
   totalCount: number;
+}
+
+function isSafeImageUrl(url: string): boolean {
+  if (url.startsWith("https://") || url.startsWith("http://")) {
+    return url.length <= 2048;
+  }
+  if (url.startsWith("/") && !url.startsWith("//")) {
+    return url.length <= 512;
+  }
+  if (url.startsWith("data:image/")) {
+    return url.length <= MAX_DATA_URL_LENGTH && SAFE_DATA_IMAGE_RE.test(url);
+  }
+  return false;
+}
+
+/** 校验并净化失物图片 URL 列表（最多 3 张，过滤空值并阻断非法协议）。 */
+export function validateLostFoundImages(raw: unknown): {
+  images: string[];
+  errorCode?: string;
+  errorMessage?: string;
+} {
+  if (raw === undefined || raw === null) {
+    return { images: [] };
+  }
+  if (!Array.isArray(raw)) {
+    return {
+      images: [],
+      errorCode: "BAD_IMAGES",
+      errorMessage: "图片列表格式不正确",
+    };
+  }
+
+  const trimmed = raw
+    .filter((item): item is string => typeof item === "string")
+    .map((item) => item.trim())
+    .filter(Boolean);
+
+  if (trimmed.length > MAX_LOST_FOUND_IMAGES) {
+    return {
+      images: [],
+      errorCode: "TOO_MANY_IMAGES",
+      errorMessage: `每条失物招领最多上传 ${MAX_LOST_FOUND_IMAGES} 张图片`,
+    };
+  }
+
+  for (const url of trimmed) {
+    if (!isSafeImageUrl(url)) {
+      return {
+        images: [],
+        errorCode: "BAD_IMAGES",
+        errorMessage: "包含不受支持的图片地址或格式，请重新上传 JPG/PNG/WebP 图片",
+      };
+    }
+  }
+
+  return { images: trimmed };
 }
 
 function isAddedToday(timeText: string): boolean {
@@ -79,6 +142,7 @@ export async function getLostFound(id: string): Promise<LostFound | undefined> {
 export async function createLostFound(
   input: CreateLostFoundInput
 ): Promise<LostFound> {
+  const validated = validateLostFoundImages(input.images);
   const item: LostFound = {
     id: "l" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
     type: input.type,
@@ -92,6 +156,7 @@ export async function createLostFound(
       input.type === "lost"
         ? "from-rose-500 to-orange-400"
         : "from-emerald-600 to-teal-400",
+    ...(validated.images.length > 0 ? { images: validated.images } : {}),
   };
   store.lostFound = [item, ...store.lostFound];
   return item;

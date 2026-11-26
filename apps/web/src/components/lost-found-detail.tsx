@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Icon } from "./icon";
 import { apiUpdateLostFoundStatus } from "@/lib/api-client";
@@ -25,8 +25,28 @@ export function LostFoundDetail({ initialItem }: { initialItem: LostFound }) {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
+  const images = item.images ?? [];
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setLightboxOpen(false);
+      } else if (event.key === "ArrowLeft" && images.length > 1) {
+        setActiveIndex((prev) => (prev - 1 + images.length) % images.length);
+      } else if (event.key === "ArrowRight" && images.length > 1) {
+        setActiveIndex((prev) => (prev + 1) % images.length);
+      }
+    }
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [images.length, lightboxOpen]);
+
   const type = lostTypeMeta[item.type];
   const status = lostStatusMeta[item.status];
+  const safeIndex = images.length > 0 ? Math.min(activeIndex, images.length - 1) : 0;
 
   async function handleUpdateStatus(nextStatus: LostFoundStatus) {
     setPendingStatus(nextStatus);
@@ -84,6 +104,11 @@ export function LostFoundDetail({ initialItem }: { initialItem: LostFound }) {
               >
                 {status.label}
               </span>
+              {images.length > 0 ? (
+                <span className="rounded-full bg-slate-950/35 px-3 py-1 text-xs font-medium backdrop-blur">
+                  含 {images.length} 张实拍图
+                </span>
+              ) : null}
             </div>
 
             <div className="flex items-end justify-between gap-4">
@@ -100,6 +125,64 @@ export function LostFoundDetail({ initialItem }: { initialItem: LostFound }) {
 
         <div className="grid gap-6 p-5 sm:p-7 lg:grid-cols-[1.4fr_0.65fr]">
           <div className="space-y-6">
+            {images.length > 0 ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-sm font-semibold text-slate-900">
+                    物品实拍图（{safeIndex + 1} / {images.length}）
+                  </h2>
+                  <button
+                    type="button"
+                    onClick={() => setLightboxOpen(true)}
+                    className="text-xs font-medium text-emerald-700 hover:underline"
+                  >
+                    点击放大查看
+                  </button>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setLightboxOpen(true)}
+                  className="group relative block w-full overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-100"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={images[safeIndex]}
+                    alt={`${item.title} 实拍图 ${safeIndex + 1}`}
+                    className="max-h-96 w-full object-contain bg-slate-950/5 transition duration-200 group-hover:scale-[1.01]"
+                  />
+                  <span className="absolute bottom-3 right-3 rounded-full bg-slate-900/70 px-3 py-1 text-xs font-medium text-white backdrop-blur">
+                    查看大图
+                  </span>
+                </button>
+
+                {images.length > 1 ? (
+                  <div className="flex gap-2.5 overflow-x-auto pb-1">
+                    {images.map((url, idx) => (
+                      <button
+                        key={url + idx}
+                        type="button"
+                        onClick={() => setActiveIndex(idx)}
+                        className={cn(
+                          "relative h-16 w-20 shrink-0 overflow-hidden rounded-xl border-2 transition",
+                          idx === safeIndex
+                            ? "border-[#0f5132] ring-2 ring-emerald-200"
+                            : "border-slate-200 opacity-75 hover:opacity-100"
+                        )}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={url}
+                          alt={`缩略图 ${idx + 1}`}
+                          className="h-full w-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="rounded-2xl bg-slate-50 p-4">
                 <p className="flex items-center gap-1.5 text-xs text-slate-500">
@@ -235,6 +318,67 @@ export function LostFoundDetail({ initialItem }: { initialItem: LostFound }) {
           </aside>
         </div>
       </section>
+
+      {lightboxOpen && images[safeIndex] ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="实拍大图预览"
+          onClick={() => setLightboxOpen(false)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 p-4 backdrop-blur-sm"
+        >
+          <div
+            onClick={(event) => event.stopPropagation()}
+            className="relative flex max-h-[90vh] max-w-4xl flex-col items-center gap-3"
+          >
+            <button
+              type="button"
+              onClick={() => setLightboxOpen(false)}
+              aria-label="关闭大图预览"
+              className="absolute -right-2 -top-2 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white text-slate-800 shadow-lg transition hover:bg-slate-100"
+            >
+              <Icon name="close" className="h-4 w-4" />
+            </button>
+
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={images[safeIndex]}
+              alt={`${item.title} 大图 ${safeIndex + 1}`}
+              className="max-h-[78vh] max-w-full rounded-2xl object-contain shadow-2xl"
+            />
+
+            <div className="flex items-center gap-3 text-xs text-white/90">
+              {images.length > 1 ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setActiveIndex(
+                      (prev) => (prev - 1 + images.length) % images.length
+                    )
+                  }
+                  className="rounded-full bg-white/15 px-3 py-1.5 transition hover:bg-white/25"
+                >
+                  上一张
+                </button>
+              ) : null}
+              <span>
+                {safeIndex + 1} / {images.length}
+              </span>
+              {images.length > 1 ? (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setActiveIndex((prev) => (prev + 1) % images.length)
+                  }
+                  className="rounded-full bg-white/15 px-3 py-1.5 transition hover:bg-white/25"
+                >
+                  下一张
+                </button>
+              ) : null}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
