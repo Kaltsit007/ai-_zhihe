@@ -14,9 +14,9 @@ import {
   answers,
   lostFound,
   questions,
-  schoolInfo,
   tasks,
 } from "@/lib/mock-data";
+import schoolInfoSeed from "./school-info.seed.json";
 import type {
   Answer,
   LostFound,
@@ -38,7 +38,9 @@ function createStore(): DemoStore {
     tasks: [...tasks],
     questions: [...questions],
     answers: [...answers],
-    schoolInfo: [...schoolInfo],
+    // 学校信息库：310 条来自 crawler 抓取的公开数据（B 的 D2 交付），
+    // 其余模块仍是 mock seed。
+    schoolInfo: [...(schoolInfoSeed as unknown as SchoolInfo[])],
     lostFound: [...lostFound],
   };
 }

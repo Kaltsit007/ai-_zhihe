@@ -36,7 +36,7 @@ export default async function InfoPage() {
               数据来源
             </div>
             <p className="mt-2 text-xs leading-5 text-slate-500">
-              当前是演示 seed。P0 接 1 个公开数据源的最小爬虫，按 source_url 去重，保留来源链接。
+              已接入 310 条公开信息（校新闻网 + 计算机学院官网），由爬虫抓取、按来源去重，保留原始链接。
             </p>
             <div className="mt-4 rounded-xl bg-slate-50 p-3 text-[10px] leading-5 text-slate-500">
               只抓公开信息，不登录、不绕验证码、不抓个人信息。页面会加来源和“仅供参考”提示。
