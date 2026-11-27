@@ -16,7 +16,7 @@ const MapPickerCanvas = dynamic(
 
 /**
  * 发布页的选点块：地图点选 + 常用地点快捷选择 + 清除。
- * 只回传坐标，不碰 Task 类型；存字段要等 A 那边的 lat/lng。
+ * 选到的坐标由发布表单随 POST 提交，存成 Task 的可选 lat/lng。
  */
 export function MapPicker({
   value,

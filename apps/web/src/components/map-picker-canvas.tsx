@@ -31,7 +31,7 @@ function buildPickerIcon(): L.DivIcon {
 
 /**
  * 选点地图：点一下落一个 pin，pin 可以拖。
- * 只负责“选坐标”，存不存得下取决于 Task 有没有 lat/lng（A 的字段）。
+ * 只负责“选坐标”；选到的坐标由发布表单随 POST 提交，Task 已支持可选 lat/lng。
  */
 export function MapPickerCanvas({
   value,

@@ -45,8 +45,6 @@ export function TaskForm() {
     }
 
     setPending(true);
-    // TODO(D3): lat/lng 现在会被 /api/tasks 忽略（CreateTaskInput 还没有这两个字段），
-    // A 把 types.ts、migration、POST 接好之后不用再改这里。
     const payload = {
       title,
       description,

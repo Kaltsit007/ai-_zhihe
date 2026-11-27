@@ -1,9 +1,8 @@
 /**
  * 校园地点坐标表（GCJ-02，与高德瓦片同口径）。
  *
- * 为什么要有这张表：Task 里现在只有 location 文本（"图书馆一楼讨论区"），
- * 没有经纬度字段。真地图需要坐标，而改 Task 类型和 mock-data 属于 A 的领地，
- * 所以 D2 先在前端做一层“地名 → 坐标”的映射，页面和接口契约都不动。
+ * Task 从 D3 起支持可选的 lat/lng（发布页选点写入）。没有坐标的旧委托
+ * 仍按 location 文本在这里匹配；匹配不到就落一个稳定的小偏移，页面不空白。
  *
  * D3 校正：图书馆、博学楼、二食堂（松苑）、一食堂（桃苑）、体育馆、竹园、
  * 青春广场、南门、明德礼堂都按高德 POI / 底图地标重新对过（GCJ-02）；
@@ -77,8 +76,8 @@ export function clampToCampus(coord: LatLng): LatLng {
 
 /**
  * 从委托对象里读坐标。
- * Task 类型现在还只有 pin{x,y}，lat/lng 由 A 在 D3 加；这里按“可选字段”读，
- * 字段没上线时返回 null，调用方回落地名坐标表。
+ * 优先用发布时保存的 lat/lng；旧数据没有这两个字段时返回 null，
+ * 调用方回落地名坐标表。
  */
 export function readTaskCoord(input: unknown): LatLng | null {
   if (!input || typeof input !== "object") return null;

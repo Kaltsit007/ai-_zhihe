@@ -66,7 +66,7 @@ interface PinPoint {
   coord: LatLng;
 }
 
-/** 把委托列表算成点位：优先用真实坐标（A 的 D3 字段），没有就回落地名表。 */
+/** 把委托列表算成点位：优先用发布时保存的坐标，没有就回落地名表。 */
 function buildPins(tasks: Task[]): PinPoint[] {
   const seen = new Map<string, number>();
   return tasks.map((task) => {
