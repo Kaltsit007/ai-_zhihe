@@ -20,26 +20,75 @@ export const CAMPUS_CENTER: LatLng = { lat: 34.2158, lng: 117.1422 };
 export const CAMPUS_DEFAULT_ZOOM = 16;
 
 interface PlaceEntry {
+  /** 展示名，选点面板的快捷按钮用它。 */
+  name: string;
   /** 地名关键词，命中任意一个就算匹配。 */
   keywords: string[];
   coord: LatLng;
 }
 
 const PLACES: PlaceEntry[] = [
-  { keywords: ["图书馆"], coord: { lat: 34.215223, lng: 117.144908 } },
-  { keywords: ["博学楼", "博学"], coord: { lat: 34.213634, lng: 117.144014 } },
+  { name: "图书馆", keywords: ["图书馆"], coord: { lat: 34.215223, lng: 117.144908 } },
+  { name: "博学楼", keywords: ["博学楼", "博学"], coord: { lat: 34.213634, lng: 117.144014 } },
   {
+    name: "二食堂",
     keywords: ["二食堂", "松苑餐厅", "U1818", "美食广场"],
     coord: { lat: 34.213565, lng: 117.13935 },
   },
-  { keywords: ["一食堂", "桃苑餐厅"], coord: { lat: 34.2146, lng: 117.1384 } },
-  { keywords: ["体育馆", "羽毛球馆"], coord: { lat: 34.2198, lng: 117.143612 } },
-  { keywords: ["竹园", "竹苑"], coord: { lat: 34.2123, lng: 117.1389 } },
-  { keywords: ["活动中心", "大活"], coord: { lat: 34.2142, lng: 117.1408 } },
-  { keywords: ["南门"], coord: { lat: 34.2098, lng: 117.1426 } },
-  { keywords: ["青春广场"], coord: { lat: 34.213485, lng: 117.140026 } },
-  { keywords: ["明德礼堂"], coord: { lat: 34.2148, lng: 117.1416 } },
+  { name: "一食堂", keywords: ["一食堂", "桃苑餐厅"], coord: { lat: 34.2146, lng: 117.1384 } },
+  { name: "体育馆", keywords: ["体育馆", "羽毛球馆"], coord: { lat: 34.2198, lng: 117.143612 } },
+  { name: "竹园宿舍", keywords: ["竹园", "竹苑"], coord: { lat: 34.2123, lng: 117.1389 } },
+  { name: "大学生活动中心", keywords: ["活动中心", "大活"], coord: { lat: 34.2142, lng: 117.1408 } },
+  { name: "南门", keywords: ["南门"], coord: { lat: 34.2098, lng: 117.1426 } },
+  { name: "青春广场", keywords: ["青春广场"], coord: { lat: 34.213485, lng: 117.140026 } },
+  { name: "明德礼堂", keywords: ["明德礼堂"], coord: { lat: 34.2148, lng: 117.1416 } },
 ];
+
+/** 选点面板用的地点清单，展示名 + 坐标。 */
+export const CAMPUS_PLACES: { name: string; coord: LatLng }[] = PLACES.map((place) => ({
+  name: place.name,
+  coord: place.coord,
+}));
+
+/** 校区可点范围，选点时限制在这块里，防止点到校外。 */
+export const CAMPUS_BOUNDS = {
+  south: 34.2045,
+  north: 34.2248,
+  west: 117.1315,
+  east: 117.1545,
+};
+
+export function isInsideCampus(coord: LatLng): boolean {
+  return (
+    coord.lat >= CAMPUS_BOUNDS.south &&
+    coord.lat <= CAMPUS_BOUNDS.north &&
+    coord.lng >= CAMPUS_BOUNDS.west &&
+    coord.lng <= CAMPUS_BOUNDS.east
+  );
+}
+
+/** 把坐标夹回校区范围内，防止拖到校外。 */
+export function clampToCampus(coord: LatLng): LatLng {
+  return {
+    lat: Math.min(Math.max(coord.lat, CAMPUS_BOUNDS.south), CAMPUS_BOUNDS.north),
+    lng: Math.min(Math.max(coord.lng, CAMPUS_BOUNDS.west), CAMPUS_BOUNDS.east),
+  };
+}
+
+/**
+ * 从委托对象里读坐标。
+ * Task 类型现在还只有 pin{x,y}，lat/lng 由 A 在 D3 加；这里按“可选字段”读，
+ * 字段没上线时返回 null，调用方回落地名坐标表。
+ */
+export function readTaskCoord(input: unknown): LatLng | null {
+  if (!input || typeof input !== "object") return null;
+  const record = input as { lat?: unknown; lng?: unknown };
+  const lat = typeof record.lat === "number" ? record.lat : Number(record.lat);
+  const lng = typeof record.lng === "number" ? record.lng : Number(record.lng);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  if (lat === 0 && lng === 0) return null;
+  return { lat, lng };
+}
 
 /**
  * 把自由文本的地点解析成坐标。

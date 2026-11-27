@@ -5,6 +5,8 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Icon } from "./icon";
+import { MapPicker } from "./map-picker";
+import type { LatLng } from "./campus-places";
 import { apiCreateTask } from "@/lib/api-client";
 import { formatScheduleLabel } from "@/lib/data/task-scheduler";
 import { categoryMeta } from "@/lib/meta";
@@ -16,6 +18,7 @@ export function TaskForm() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
+  const [coordinate, setCoordinate] = useState<LatLng | null>(null);
   const [deadline, setDeadline] = useState("");
   const [contact, setContact] = useState("");
   const [urgent, setUrgent] = useState(false);
@@ -42,7 +45,9 @@ export function TaskForm() {
     }
 
     setPending(true);
-    const result = await apiCreateTask({
+    // TODO(D3): lat/lng 现在会被 /api/tasks 忽略（CreateTaskInput 还没有这两个字段），
+    // A 把 types.ts、migration、POST 接好之后不用再改这里。
+    const payload = {
       title,
       description,
       category,
@@ -51,7 +56,9 @@ export function TaskForm() {
       contact,
       urgent,
       scheduledAt: enableSchedule ? scheduledAt : undefined,
-    });
+      ...(coordinate ? { lat: coordinate.lat, lng: coordinate.lng } : {}),
+    };
+    const result = await apiCreateTask(payload);
 
     setPending(false);
     if (result.error || !result.data) {
@@ -63,6 +70,7 @@ export function TaskForm() {
     setTitle("");
     setDescription("");
     setLocation("");
+    setCoordinate(null);
     setDeadline("");
     setContact("");
     setUrgent(false);
@@ -182,6 +190,16 @@ export function TaskForm() {
             />
           </label>
 
+          <div className="min-w-0 sm:col-span-2">
+            <MapPicker
+              value={coordinate}
+              onChange={setCoordinate}
+              onPickPlace={(name) => {
+                setLocation(name);
+              }}
+            />
+          </div>
+
           <label className="sm:col-span-2">
             <span className="text-xs font-medium text-slate-700">详细说明</span>
             <textarea
@@ -282,9 +300,9 @@ export function TaskForm() {
           <div className="map-surface mt-3 flex h-48 items-center justify-center rounded-2xl border border-emerald-950/10">
             <div className="rounded-2xl bg-white/85 px-4 py-3 text-center shadow-sm backdrop-blur">
               <Icon name="pin" className="mx-auto h-6 w-6 text-emerald-700" />
-              <p className="mt-1 text-xs font-medium text-slate-700">按校内地标自动落点</p>
+              <p className="mt-1 text-xs font-medium text-slate-700">左边可以直接点地图选点</p>
               <p className="mt-0.5 text-[11px] text-slate-500">
-                填写图书馆、博学楼、南门、竹园等会自动匹配矿大地图点位
+                点一下落 pin，pin 可拖动微调；不选点就按地点文字自动匹配矿大地标
               </p>
             </div>
           </div>

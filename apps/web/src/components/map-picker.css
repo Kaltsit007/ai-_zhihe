@@ -1,0 +1,53 @@
+/* 选点地图：光标改成十字，pin 画成“靶心”，和地图页的任务 pin 区分开。 */
+
+.map-picker.leaflet-map {
+  cursor: crosshair;
+}
+
+.picker-pin {
+  background: transparent;
+  border: 0;
+}
+
+.picker-pin__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  border: 2px solid rgba(15, 81, 50, 0.28);
+  background: rgba(16, 185, 129, 0.16);
+  animation: picker-pulse 2.2s ease-out infinite;
+}
+
+.picker-pin__dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  background: #0f5132;
+  border: 2px solid #ffffff;
+  box-shadow: 0 6px 14px -4px rgba(15, 23, 42, 0.55);
+}
+
+@keyframes picker-pulse {
+  0% {
+    transform: scale(0.72);
+    opacity: 0.9;
+  }
+  70% {
+    transform: scale(1.12);
+    opacity: 0.25;
+  }
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .picker-pin__ring {
+    animation: none;
+  }
+}
