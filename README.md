@@ -81,6 +81,7 @@ npm run lint
 - [接口契约](<docs/api/接口契约.md>)
 - [vibe coding 对接指南](<docs/03-vibe编码对接指南.md>)
 - [分支流程（develop 集成）](<docs/05-分支流程-develop.md>)
+- [部署与上线](<docs/06-部署与上线.md>)
 - [开发日志 D0](<docs/devlog/D0.md>)
 
 ## 团队
