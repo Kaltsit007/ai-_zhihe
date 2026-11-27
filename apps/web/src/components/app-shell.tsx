@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { Icon, type IconName } from "./icon";
 import { cn } from "@/lib/utils";
+import { AuthStatus } from "./auth-status";
 
 const navItems: Array<{ href: string; label: string; icon: IconName }> = [
   { href: "/", label: "总览", icon: "home" },
@@ -106,16 +107,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               先跑通委托闭环，再接答疑、失物招领和机器人。
             </p>
           </div>
-          <div className="mt-4 flex items-center gap-3 rounded-2xl px-2 py-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-xs font-semibold text-white">
-              A
-            </span>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium">A · 技术负责人</p>
-              <p className="truncate text-[11px] text-slate-400">Kaltsit007</p>
-            </div>
-            <span className="ml-auto h-2 w-2 rounded-full bg-emerald-500" />
-          </div>
+          <AuthStatus />
         </div>
       </aside>
 

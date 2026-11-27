@@ -51,6 +51,19 @@ npm run dev
 
 如果还没有配 Supabase，页面会先用 mock 数据运行；填好 .env.local 后再接真实数据。
 
+## 接入 Supabase（可选）
+
+默认是内存演示模式，不配置也能跑。要变成真实持久化：
+
+1. 新建 Supabase 项目，在 SQL Editor 依次执行
+   `supabase/migrations/0001_init.sql` 和 `0002_tasks_schedule.sql`。
+2. 把 `.env.example` 复制成 `apps/web/.env.local`，填
+   `NEXT_PUBLIC_SUPABASE_URL`、`NEXT_PUBLIC_SUPABASE_ANON_KEY`、`SUPABASE_SERVICE_ROLE_KEY`。
+3. 重启 `npm run dev`。配置生效后：委托读写走 `public.tasks`，`/admin` 需要登录，
+   侧栏出现登录入口；未配置时仍是内存演示库。
+4. 注册：打开 `/login` 用邮箱 + 密码注册（Supabase 默认开启邮箱确认，可在
+   Authentication → Providers 里关掉，演示更方便）。
+
 ## 常用命令
 
 ~~~powershell
