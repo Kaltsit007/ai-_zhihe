@@ -1,6 +1,6 @@
 import { createTask, listTasks } from "@/lib/data/tasks";
 import { parseTaskDateTime } from "@/lib/data/task-scheduler";
-import { oneOf, str, strOr } from "@/lib/data/validation";
+import { num, oneOf, str, strOr } from "@/lib/data/validation";
 import { fail, ok } from "@/lib/api/respond";
 import type { TaskCategory, TaskStatus } from "@/lib/types";
 
@@ -63,6 +63,28 @@ export async function POST(request: Request) {
 
   const deadline = strOr(body.deadline, "长期有效", 40);
 
+  // 坐标可选，但必须成对出现；统一按 GCJ-02 存，和地图瓦片同口径。
+  const hasLat = body.lat !== undefined && body.lat !== null && body.lat !== "";
+  const hasLng = body.lng !== undefined && body.lng !== null && body.lng !== "";
+  let lat: number | undefined;
+  let lng: number | undefined;
+  if (hasLat || hasLng) {
+    const parsedLat = num(body.lat);
+    const parsedLng = num(body.lng);
+    if (
+      parsedLat === null ||
+      parsedLng === null ||
+      parsedLat < -90 ||
+      parsedLat > 90 ||
+      parsedLng < -180 ||
+      parsedLng > 180
+    ) {
+      return fail("BAD_COORD", "坐标不合法，请同时提供有效的 lat 和 lng（GCJ-02）");
+    }
+    lat = parsedLat;
+    lng = parsedLng;
+  }
+
   let scheduledAt: string | undefined;
   if (body.scheduledAt !== undefined && body.scheduledAt !== null && body.scheduledAt !== "") {
     const rawSchedule = str(body.scheduledAt, 40);
@@ -91,6 +113,8 @@ export async function POST(request: Request) {
     contact,
     urgent: body.urgent === true,
     scheduledAt,
+    lat,
+    lng,
   });
   return ok(task, 201);
 }

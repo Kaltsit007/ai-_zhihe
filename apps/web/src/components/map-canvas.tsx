@@ -13,6 +13,8 @@ import type { Task, TaskCategory } from "@/lib/types";
 import {
   CAMPUS_CENTER,
   CAMPUS_DEFAULT_ZOOM,
+  clampToCampus,
+  readTaskCoord,
   resolveTaskCoord,
   spreadCoord,
   type LatLng,
@@ -64,11 +66,14 @@ interface PinPoint {
   coord: LatLng;
 }
 
-/** 把委托列表算成点位：同地点错开、未知地点落校区中心附近。 */
+/** 把委托列表算成点位：优先用发布时保存的坐标，没有就回落地名表。 */
 function buildPins(tasks: Task[]): PinPoint[] {
   const seen = new Map<string, number>();
   return tasks.map((task) => {
-    const { coord } = resolveTaskCoord(task.location);
+    const stored = readTaskCoord(task);
+    const coord = stored
+      ? clampToCampus(stored)
+      : resolveTaskCoord(task.location).coord;
     const key = coord.lat.toFixed(4) + ":" + coord.lng.toFixed(4);
     const repeat = seen.get(key) ?? 0;
     seen.set(key, repeat + 1);

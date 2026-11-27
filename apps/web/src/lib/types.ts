@@ -37,6 +37,9 @@ export interface Task {
   contact: string;
   tags: string[];
   urgent?: boolean;
+  /** 发布页地图选点保存的 GCJ-02 坐标；没选点时不写，前端回落地名坐标表。 */
+  lat?: number;
+  lng?: number;
   pin: { x: number; y: number };
   createdAt: string;
   scheduledAt?: string;

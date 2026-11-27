@@ -37,6 +37,9 @@ export interface CreateTaskInput {
   contact: string;
   urgent?: boolean;
   scheduledAt?: string;
+  /** GCJ-02 坐标，必须成对出现；不选点就不传。 */
+  lat?: number;
+  lng?: number;
 }
 
 function formatDeadline(value: string): string {
@@ -58,6 +61,8 @@ interface TaskRow {
   contact: string | null;
   tags: string[] | null;
   urgent: boolean | null;
+  lat: number | null;
+  lng: number | null;
   created_at: string;
   profiles?: { nickname: string } | null;
 }
@@ -66,6 +71,8 @@ const TASK_SELECT = "*, profiles:creator_id(nickname)";
 
 function mapRow(row: TaskRow): Task {
   const raw = row.raw_deadline || row.deadline || "";
+  const lat = typeof row.lat === "number" && Number.isFinite(row.lat) ? row.lat : undefined;
+  const lng = typeof row.lng === "number" && Number.isFinite(row.lng) ? row.lng : undefined;
   return {
     id: row.id,
     title: row.title,
@@ -78,6 +85,7 @@ function mapRow(row: TaskRow): Task {
     contact: row.contact || "",
     tags: row.tags ?? [],
     urgent: row.urgent ?? false,
+    ...(lat !== undefined && lng !== undefined ? { lat, lng } : {}),
     pin: { x: 50, y: 50 },
     createdAt: row.created_at ? row.created_at.slice(5, 16).replace("T", " ") : "刚刚",
     scheduledAt: row.scheduled_at ?? undefined,
@@ -179,6 +187,9 @@ export async function createTask(input: CreateTaskInput): Promise<Task> {
       contact: input.contact,
       tags: [],
       urgent: input.urgent ?? false,
+      ...(input.lat !== undefined && input.lng !== undefined
+        ? { lat: input.lat, lng: input.lng }
+        : {}),
       pin: { x: 50, y: 50 },
       createdAt: isFutureSchedule ? "定时待发布" : "刚刚",
       ...(isFutureSchedule && parsedSchedule ? { scheduledAt: parsedSchedule.toISOString() } : {}),
@@ -205,6 +216,8 @@ export async function createTask(input: CreateTaskInput): Promise<Task> {
       scheduled_at: isFutureSchedule && parsedSchedule ? parsedSchedule.toISOString() : null,
       contact: input.contact,
       urgent: input.urgent ?? false,
+      lat: input.lat ?? null,
+      lng: input.lng ?? null,
       creator_id: user.id,
       status: "pending",
     })

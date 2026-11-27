@@ -112,8 +112,7 @@ export default async function MapPage() {
               坐标口径
             </div>
             <p className="mt-2 text-[11px] leading-5 text-slate-500">
-              高德瓦片用 GCJ-02，OSM 用 WGS84。现在点位和底图都走 GCJ-02，不会整体偏移。
-              D3 做发布页选点时沿用同一口径，不要混用。
+              高德瓦片用 GCJ-02，OSM 用 WGS84。现在点位、底图和发布页选点都走 GCJ-02，不会整体偏移。
             </p>
           </section>
         </aside>
