@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useRef, useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import { Icon, type IconName } from "./icon";
 import { cn } from "@/lib/utils";
@@ -80,6 +80,12 @@ function HeaderSearch({ initialQuery }: { initialQuery: string }) {
       </label>
     </form>
   );
+}
+
+function HeaderSearchSlot() {
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get("q") ?? "";
+  return <HeaderSearch key={initialQuery} initialQuery={initialQuery} />;
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -178,7 +184,13 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
 
             <div className="ml-auto flex items-center gap-2">
-              <HeaderSearch key={pathname} initialQuery="" />
+              <Suspense
+                fallback={
+                  <div className="hidden h-10 w-64 rounded-xl bg-white/50 md:block" aria-hidden />
+                }
+              >
+                <HeaderSearchSlot />
+              </Suspense>
               <button
                 type="button"
                 className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-950/10 bg-white/70 text-slate-500 shadow-sm transition hover:text-emerald-700"

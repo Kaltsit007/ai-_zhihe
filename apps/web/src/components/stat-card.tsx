@@ -28,11 +28,11 @@ export function StatCard({
         <span className={cn("flex h-9 w-9 items-center justify-center rounded-xl", tones[tone])}>
           <Icon name={icon} className="h-4 w-4" />
         </span>
-        <span className="rounded-full bg-slate-50 px-2 py-1 text-[10px] text-slate-400">D0</span>
+        <span className="rounded-full bg-slate-50 px-2 py-1 text-xs text-slate-400">P0</span>
       </div>
       <p className="mt-4 text-2xl font-semibold tracking-tight text-slate-900">{value}</p>
       <p className="mt-0.5 text-xs font-medium text-slate-500">{label}</p>
-      <p className="mt-2 text-[10px] leading-4 text-slate-400">{note}</p>
+      <p className="mt-2 text-xs leading-4 text-slate-400">{note}</p>
     </div>
   );
 }

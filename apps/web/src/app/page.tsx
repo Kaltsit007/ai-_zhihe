@@ -59,9 +59,9 @@ export default async function HomePage() {
 
         <div className="relative grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200/70 bg-emerald-50/80 px-3 py-1.5 text-[11px] font-medium text-emerald-800">
+            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200/70 bg-emerald-50/80 px-3 py-1.5 text-xs font-medium text-emerald-800">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-              D0 · 框架已搭好，准备接 P0
+              P0 · 主流程已跑通，准备 D5 联调
             </div>
             <h1 className="mt-5 max-w-2xl text-balance text-3xl font-semibold leading-[1.15] tracking-tight text-slate-950 sm:text-5xl">
               把校园里的求助，
@@ -89,7 +89,7 @@ export default async function HomePage() {
               </Link>
             </div>
 
-            <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-[11px] text-slate-400">
+            <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-slate-400">
               <span className="flex items-center gap-1.5">
                 <Icon name="users" className="h-3.5 w-3.5" />
                 5 人团队
@@ -108,12 +108,12 @@ export default async function HomePage() {
           <div className="relative rounded-[1.75rem] bg-[#0f5132] p-5 text-white shadow-xl shadow-emerald-950/20 sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-200/80">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200/80">
                   P0 progress
                 </p>
                 <p className="mt-1 text-lg font-semibold">先把闭环跑通</p>
               </div>
-              <span className="rounded-full bg-white/10 px-2.5 py-1 text-[10px] text-emerald-100">
+              <span className="rounded-full bg-white/10 px-2.5 py-1 text-xs text-emerald-100">
                 4 / 7
               </span>
             </div>
@@ -126,7 +126,7 @@ export default async function HomePage() {
                 { label: "失物招领和机器人", value: 20 },
               ].map((item) => (
                 <div key={item.label}>
-                  <div className="flex items-center justify-between text-[11px]">
+                  <div className="flex items-center justify-between text-xs">
                     <span className="text-emerald-50/90">{item.label}</span>
                     <span className="text-emerald-200/70">{item.value}%</span>
                   </div>
@@ -183,7 +183,7 @@ export default async function HomePage() {
         <section className="card p-4 sm:p-5">
           <div className="mb-4 flex items-end justify-between gap-3">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-700">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
                 Campus map
               </p>
               <h2 className="mt-1 text-lg font-semibold tracking-tight">校园互助地图</h2>
@@ -206,7 +206,7 @@ export default async function HomePage() {
           <section className="card p-5">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold">今日速览</h2>
-              <span className="rounded-full bg-emerald-50 px-2 py-1 text-[10px] text-emerald-700">
+              <span className="rounded-full bg-emerald-50 px-2 py-1 text-xs text-emerald-700">
                 {latestTasks.length} 条新委托
               </span>
             </div>
@@ -227,7 +227,7 @@ export default async function HomePage() {
                     <span className="block truncate text-xs font-medium text-slate-700 group-hover:text-emerald-800">
                       {task.title}
                     </span>
-                    <span className="mt-0.5 block text-[10px] text-slate-400">
+                    <span className="mt-0.5 block text-xs text-slate-400">
                       {task.location} · {task.deadline}
                     </span>
                   </span>
@@ -236,7 +236,7 @@ export default async function HomePage() {
             </div>
             <Link
               href="/tasks"
-              className="mt-4 flex items-center justify-center rounded-xl border border-slate-200 py-2.5 text-[11px] font-medium text-slate-500 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
+              className="mt-4 flex items-center justify-center rounded-xl border border-slate-200 py-2.5 text-xs font-medium text-slate-500 transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
             >
               去委托广场
             </Link>
@@ -264,7 +264,7 @@ export default async function HomePage() {
               {["教务", "生活", "场馆", "奖助", "就业"].map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full bg-slate-50 px-2.5 py-1 text-[10px] text-slate-500"
+                  className="rounded-full bg-slate-50 px-2.5 py-1 text-xs text-slate-500"
                 >
                   {tag}
                 </span>
@@ -278,13 +278,13 @@ export default async function HomePage() {
                 <Icon name="bot" className="h-4 w-4 text-emerald-700" />
                 失物招领
               </div>
-              <span className="rounded-full bg-rose-50 px-2 py-1 text-[10px] text-rose-600">
+              <span className="rounded-full bg-rose-50 px-2 py-1 text-xs text-rose-600">
                 {openLost.length} 条待认领
               </span>
             </div>
             <div className="mt-3 space-y-2">
               {openLost.slice(0, 2).map((item) => (
-                <div key={item.id} className="flex items-center gap-2 text-[11px]">
+                <div key={item.id} className="flex items-center gap-2 text-xs">
                   <span className={cn("h-1.5 w-1.5 rounded-full", item.type === "lost" ? "bg-rose-500" : "bg-emerald-500")} />
                   <span className="truncate text-slate-600">{item.title}</span>
                   <span className="ml-auto shrink-0 text-slate-400">{item.location}</span>
@@ -293,7 +293,7 @@ export default async function HomePage() {
             </div>
             <Link
               href="/lost-found"
-              className="mt-4 flex items-center justify-center rounded-xl bg-slate-900 py-2.5 text-[11px] font-medium text-white transition hover:bg-slate-800"
+              className="mt-4 flex items-center justify-center rounded-xl bg-slate-900 py-2.5 text-xs font-medium text-white transition hover:bg-slate-800"
             >
               查看失物招领
             </Link>
@@ -304,7 +304,7 @@ export default async function HomePage() {
       <section>
         <div className="mb-4 flex items-end justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
               Categories
             </p>
             <h2 className="mt-1 text-lg font-semibold tracking-tight">你想发什么？</h2>
@@ -326,7 +326,7 @@ export default async function HomePage() {
               <p className="mt-3 text-sm font-semibold text-slate-800 group-hover:text-emerald-800">
                 {item.label}
               </p>
-              <p className="mt-1 text-[10px] leading-4 text-slate-400">{item.description}</p>
+              <p className="mt-1 text-xs leading-4 text-slate-400">{item.description}</p>
             </Link>
           ))}
         </div>
@@ -335,7 +335,7 @@ export default async function HomePage() {
       <section>
         <div className="mb-4 flex items-end justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
               Latest
             </p>
             <h2 className="mt-1 text-lg font-semibold tracking-tight">最新委托</h2>
