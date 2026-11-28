@@ -45,13 +45,13 @@ export function TaskActions({
       <div className="flex items-center justify-between">
         <span
           className={cn(
-            "rounded-full px-2.5 py-1 text-[10px] font-medium ring-1 ring-inset",
+            "rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset",
             meta.className
           )}
         >
           {meta.label}
         </span>
-        <span className="text-[10px] text-slate-400">状态会写入演示库</span>
+        <span className="text-xs text-slate-400">状态变更会立即保存</span>
       </div>
 
       <div className="mt-4 space-y-2">
@@ -113,7 +113,7 @@ export function TaskActions({
       </button>
 
       {message ? (
-        <p className="mt-3 rounded-xl bg-slate-50 px-3 py-2 text-[11px] leading-5 text-slate-500">
+        <p className="mt-3 rounded-xl bg-slate-50 px-3 py-2 text-xs leading-5 text-slate-500">
           {message}
         </p>
       ) : null}

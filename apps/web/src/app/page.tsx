@@ -140,9 +140,9 @@ export default async function HomePage() {
               ))}
             </div>
 
-            <div className="mt-5 rounded-2xl bg-white/10 p-3.5 text-[11px] leading-5 text-emerald-50/90">
-              <span className="font-medium text-white">D3 中午硬节点：</span>
-              委托、答疑、学校信息、失物招领都能演示；真爬虫和群机器人先跑最小实现。
+            <div className="mt-5 rounded-2xl bg-white/10 p-3.5 text-xs leading-5 text-emerald-50/90">
+              <span className="font-medium text-white">当前进度：</span>
+              委托、答疑、学校信息、失物招领主流程已跑通；真实爬虫和群机器人按最小实现。
             </div>
           </div>
         </div>
@@ -188,7 +188,7 @@ export default async function HomePage() {
               </p>
               <h2 className="mt-1 text-lg font-semibold tracking-tight">校园互助地图</h2>
               <p className="mt-1 text-xs text-slate-400">
-                点位是演示数据，下一步接 Leaflet 和真实坐标。
+                点位按校园地标与发布选点落到高德底图上，点击可进详情。
               </p>
             </div>
             <Link

@@ -76,12 +76,12 @@ export function TaskForm() {
       <div className="card p-5 sm:p-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-700">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
               New task
             </p>
             <h2 className="mt-1 text-lg font-semibold">发布一条委托</h2>
           </div>
-          <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-medium text-emerald-700">
+          <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
             支持预约定时上架
           </span>
         </div>
@@ -210,7 +210,7 @@ export function TaskForm() {
               <span className="text-xs font-semibold text-slate-800">
                 开启定时发布（可选）
               </span>
-              <span className="rounded-full bg-violet-50 px-2 py-0.5 text-[11px] font-medium text-violet-700">
+              <span className="rounded-full bg-violet-50 px-2 py-0.5 text-xs font-medium text-violet-700">
                 到点自动上架
               </span>
             </label>
@@ -283,7 +283,7 @@ export function TaskForm() {
             <div className="rounded-2xl bg-white/85 px-4 py-3 text-center shadow-sm backdrop-blur">
               <Icon name="pin" className="mx-auto h-6 w-6 text-emerald-700" />
               <p className="mt-1 text-xs font-medium text-slate-700">按校内地标自动落点</p>
-              <p className="mt-0.5 text-[11px] text-slate-500">
+              <p className="mt-0.5 text-xs text-slate-500">
                 填写图书馆、博学楼、南门、竹园等会自动匹配矿大地图点位
               </p>
             </div>

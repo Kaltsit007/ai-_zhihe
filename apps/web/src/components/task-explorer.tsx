@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Icon } from "./icon";
 import { TaskCard } from "./task-card";
@@ -8,18 +9,25 @@ import type { Task, TaskCategory, TaskStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 type CategoryFilter = "all" | TaskCategory;
-type StatusFilter = "all" | Exclude<TaskStatus, "cancelled">;
+type StatusFilter = "all" | TaskStatus;
 
 const statusOrder: StatusFilter[] = [
   "all",
   "pending",
   "in_progress",
   "completed",
+  "cancelled",
   "archived",
 ];
 
-export function TaskExplorer({ tasks }: { tasks: Task[] }) {
-  const [query, setQuery] = useState("");
+export function TaskExplorer({
+  tasks,
+  initialQuery = "",
+}: {
+  tasks: Task[];
+  initialQuery?: string;
+}) {
+  const [query, setQuery] = useState(initialQuery);
   const [category, setCategory] = useState<CategoryFilter>("all");
   const [status, setStatus] = useState<StatusFilter>("all");
 
@@ -42,6 +50,8 @@ export function TaskExplorer({ tasks }: { tasks: Task[] }) {
       return haystack.includes(keyword);
     });
   }, [category, query, status, tasks]);
+
+  const hasFilters = Boolean(query.trim()) || category !== "all" || status !== "all";
 
   return (
     <div className="space-y-4">
@@ -67,7 +77,7 @@ export function TaskExplorer({ tasks }: { tasks: Task[] }) {
                   setCategory("all");
                   setStatus("all");
                 }}
-                className="ml-1 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] text-slate-500 transition hover:bg-slate-200"
+                className="ml-1 rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-500 transition hover:bg-slate-200"
               >
                 重置
               </button>
@@ -80,7 +90,7 @@ export function TaskExplorer({ tasks }: { tasks: Task[] }) {
             type="button"
             onClick={() => setCategory("all")}
             className={cn(
-              "rounded-full px-3 py-1.5 text-[11px] font-medium transition",
+              "rounded-full px-3 py-1.5 text-xs font-medium transition",
               category === "all"
                 ? "bg-slate-900 text-white"
                 : "bg-slate-50 text-slate-500 hover:bg-slate-100"
@@ -94,7 +104,7 @@ export function TaskExplorer({ tasks }: { tasks: Task[] }) {
               type="button"
               onClick={() => setCategory(key as TaskCategory)}
               className={cn(
-                "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-medium transition",
+                "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition",
                 category === key
                   ? "bg-slate-900 text-white"
                   : "bg-slate-50 text-slate-500 hover:bg-slate-100"
@@ -113,7 +123,7 @@ export function TaskExplorer({ tasks }: { tasks: Task[] }) {
               type="button"
               onClick={() => setStatus(item)}
               className={cn(
-                "rounded-full px-3 py-1.5 text-[11px] font-medium transition",
+                "rounded-full px-3 py-1.5 text-xs font-medium transition",
                 status === item
                   ? "bg-emerald-50 text-emerald-700 ring-1 ring-inset ring-emerald-200"
                   : "text-slate-400 hover:bg-slate-50 hover:text-slate-600"
@@ -136,10 +146,23 @@ export function TaskExplorer({ tasks }: { tasks: Task[] }) {
           <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 text-slate-400">
             <Icon name="search" className="h-5 w-5" />
           </span>
-          <p className="mt-4 text-sm font-medium text-slate-700">没有找到匹配的委托</p>
-          <p className="mt-1 text-xs text-slate-400">
-            换个关键词，或清空筛选条件再试。
+          <p className="mt-4 text-sm font-medium text-slate-700">
+            {hasFilters ? "没有找到匹配的委托" : "还没有委托"}
           </p>
+          <p className="mt-1 text-xs text-slate-400">
+            {hasFilters
+              ? "换个关键词，或清空筛选条件再试。"
+              : "发布第一条委托，让同学在地图上看到你。"}
+          </p>
+          {hasFilters ? null : (
+            <Link
+              href="/tasks/new"
+              className="mt-4 inline-flex h-9 items-center gap-1.5 rounded-xl bg-[#0f5132] px-4 text-xs font-medium text-white transition hover:bg-[#0b3f27]"
+            >
+              <Icon name="plus" className="h-3.5 w-3.5" />
+              发布委托
+            </Link>
+          )}
         </div>
       )}
     </div>
