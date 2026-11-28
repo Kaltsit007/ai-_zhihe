@@ -51,15 +51,15 @@ export default async function MapPage() {
         <section className="card p-4 sm:p-5">
           <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-700">
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">
                 Live map
               </p>
               <h2 className="mt-1 text-lg font-semibold">校园互助点位</h2>
-              <p className="mt-1 text-[11px] text-slate-500">
+              <p className="mt-1 text-xs text-slate-500">
                 共 {tasks.length} 条委托，{active.length} 条可显示在地图上。
               </p>
             </div>
-            <div className="flex items-center gap-2 text-[10px] text-slate-400">
+            <div className="flex items-center gap-2 text-xs text-slate-400">
               <span className="flex items-center gap-1">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                 {active.length} 个可接点位
@@ -97,8 +97,8 @@ export default async function MapPage() {
             <ul className="mt-3 space-y-2.5">
               {mapFacts.map((fact) => (
                 <li key={fact.label} className="flex items-baseline justify-between gap-3">
-                  <span className="shrink-0 text-[11px] text-slate-400">{fact.label}</span>
-                  <span className="text-right text-[11px] font-medium text-slate-600">
+                  <span className="shrink-0 text-xs text-slate-400">{fact.label}</span>
+                  <span className="text-right text-xs font-medium text-slate-600">
                     {fact.value}
                   </span>
                 </li>
@@ -111,7 +111,7 @@ export default async function MapPage() {
               <Icon name="shield" className="h-4 w-4 text-emerald-700" />
               坐标口径
             </div>
-            <p className="mt-2 text-[11px] leading-5 text-slate-500">
+            <p className="mt-2 text-xs leading-5 text-slate-500">
               高德瓦片用 GCJ-02，OSM 用 WGS84。现在点位和底图都走 GCJ-02，不会整体偏移。
               D3 做发布页选点时沿用同一口径，不要混用。
             </p>

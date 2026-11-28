@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useRef, useState } from "react";
+import type { FormEvent, ReactNode } from "react";
 import { Icon, type IconName } from "./icon";
 import { cn } from "@/lib/utils";
 import { AuthStatus } from "./auth-status";
@@ -35,6 +36,58 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(href + "/");
 }
 
+function HeaderSearch({ initialQuery }: { initialQuery: string }) {
+  const router = useRouter();
+  const [query, setQuery] = useState(initialQuery);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  // 桌面端按 / 聚焦搜索框；在输入框、文本域里不抢键。
+  useEffect(() => {
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== "/" || event.metaKey || event.ctrlKey || event.altKey) return;
+      const target = event.target as HTMLElement | null;
+      const tag = target?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || target?.isContentEditable) return;
+      if (!searchRef.current) return;
+      event.preventDefault();
+      searchRef.current.focus();
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  function submitSearch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const keyword = query.trim();
+    router.push(keyword ? "/tasks?q=" + encodeURIComponent(keyword) : "/tasks");
+  }
+
+  return (
+    <form onSubmit={submitSearch} className="hidden md:block">
+      <label className="flex h-10 w-64 items-center gap-2 rounded-xl border border-emerald-950/10 bg-white/70 px-3 text-slate-400 shadow-sm">
+        <Icon name="search" className="h-4 w-4" />
+        <input
+          ref={searchRef}
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          className="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
+          placeholder="搜索委托标题、地点、标签"
+          aria-label="搜索委托"
+        />
+        <kbd className="rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-xs text-slate-400">
+          /
+        </kbd>
+      </label>
+    </form>
+  );
+}
+
+function HeaderSearchSlot() {
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get("q") ?? "";
+  return <HeaderSearch key={initialQuery} initialQuery={initialQuery} />;
+}
+
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const title = getTitle(pathname);
@@ -50,17 +103,17 @@ export function AppShell({ children }: { children: ReactNode }) {
             <span className="block text-base font-semibold tracking-tight">
               互助地图
             </span>
-            <span className="block text-[11px] text-slate-500">
+            <span className="block text-xs text-slate-500">
               校园综合互助平台
             </span>
           </span>
         </Link>
 
         <div className="px-4">
-          <div className="mb-3 flex items-center justify-between px-2 text-[11px] font-medium uppercase tracking-[0.18em] text-slate-400">
+          <div className="mb-3 flex items-center justify-between px-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-400">
             <span>工作台</span>
-            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] tracking-normal text-emerald-700">
-              D0
+            <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs tracking-normal text-emerald-700">
+              P0
             </span>
           </div>
           <nav className="space-y-1">
@@ -82,7 +135,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   {item.href === "/lost-found" ? (
                     <span
                       className={cn(
-                        "ml-auto rounded-full px-2 py-0.5 text-[10px]",
+                        "ml-auto rounded-full px-2 py-0.5 text-xs",
                         active
                           ? "bg-white/15 text-white"
                           : "bg-rose-50 text-rose-600"
@@ -122,7 +175,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Link>
 
             <div className="hidden min-w-0 lg:block">
-              <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-slate-400">
+              <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">
                 互助地图 / {title}
               </p>
               <p className="truncate text-sm font-medium text-slate-700">
@@ -131,17 +184,13 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
 
             <div className="ml-auto flex items-center gap-2">
-              <label className="hidden h-10 w-64 items-center gap-2 rounded-xl border border-emerald-950/10 bg-white/70 px-3 text-slate-400 shadow-sm md:flex">
-                <Icon name="search" className="h-4 w-4" />
-                <input
-                  className="w-full bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
-                  placeholder="搜索委托、问答、学校信息"
-                  aria-label="搜索"
-                />
-                <kbd className="rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] text-slate-400">
-                  /
-                </kbd>
-              </label>
+              <Suspense
+                fallback={
+                  <div className="hidden h-10 w-64 rounded-xl bg-white/50 md:block" aria-hidden />
+                }
+              >
+                <HeaderSearchSlot />
+              </Suspense>
               <button
                 type="button"
                 className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-950/10 bg-white/70 text-slate-500 shadow-sm transition hover:text-emerald-700"
